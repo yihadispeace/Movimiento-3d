@@ -24,30 +24,102 @@ public class Thirdpersoncontroller : MonoBehaviour
 
    public bool isGrounded;
 
+   private float turnSmoothVelocity;
+
+   public float turnSmoothTime = 0.1f;
+   public Transform cam;
+
+   
+
     // Start is called before the first frame update
     void  Awake() 
         
     {
         controller = GetComponent<CharacterController>();
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 move = new Vector3(Input.GetAxisRaw("Horizontal"),0, Input.GetAxisRaw("Vertical")).normalized;
-        if ( move != Vector3.zero)
+        //movement ();
+        Jump ();
 
-        {
-            float targetAngle = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg;
+        //movementTPS ();
 
-            transform.rotation = Quaternion.Euler (0, targetAngle, 0);
-            controller.Move(move * speed * Time.deltaTime);
-        }
+        movementTPS2 ();
         
 
 
         //isGrounded = controller.isGrounded;
+    }
+     void movement()
+   {
 
+
+      Vector3 move = new Vector3(Input.GetAxisRaw("Horizontal"),0, Input.GetAxisRaw("Vertical")).normalized;
+        if ( move != Vector3.zero)
+
+        {
+            float targetAngle = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf .SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+
+            transform.rotation = Quaternion.Euler (0, angle, 0);
+            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
+             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
+
+        }
+           
+           
+        }
+        //freelook camera
+        void movementTPS()
+   {
+
+
+      Vector3 move = new Vector3(Input.GetAxisRaw("Horizontal"),0, Input.GetAxisRaw("Vertical")).normalized;
+        if ( move != Vector3.zero)
+
+        {
+            float targetAngle = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf .SmoothDampAngle(transform.eulerAngles.y, cam.eulerAngles.y, ref turnSmoothVelocity, turnSmoothTime);
+
+            transform.rotation = Quaternion.Euler (0, angle, 0);
+            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
+             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
+
+        }
+           
+           
+        }
+           // virtual camera
+            void movementTPS2()
+   {
+
+
+      Vector3 move = new Vector3(Input.GetAxisRaw("Horizontal"),0, Input.GetAxisRaw("Vertical")).normalized;
+        if ( move != Vector3.zero)
+
+        {
+            float targetAngle = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf .SmoothDampAngle(transform.eulerAngles.y, cam.eulerAngles.y, ref turnSmoothVelocity, turnSmoothTime);
+
+            transform.rotation = Quaternion.Euler (0, angle, 0);
+            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
+             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
+
+        }
+           
+           
+        }
+
+
+   
+       void Jump()
+       {
         isGrounded = Physics.CheckSphere(groundSensor.position, sensorRadius, ground);
         if (isGrounded && playerVelocity.y < 0)
         {
